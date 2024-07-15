@@ -19,6 +19,7 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://myuser:mypassword@rest-api-postgres:5432/mydatabase?schema=myschema
       AUTH_SECRET: oIJ0JYc@8M8EYs#p
+      REDIS_URL: redis://redis:6379
 
   worker:
     container_name: rest-api-worker

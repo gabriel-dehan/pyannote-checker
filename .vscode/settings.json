@@ -1,12 +1,14 @@
 {
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
   },
   "files.associations": {
     ".env": "shellscript",
     ".env.*": "shellscript",
     "docker-compose.*.yml": "dockercompose"
   },
+  "eslint.validate": ["javascript", "typescript"],
   "typescript.tsdk": "node_modules/typescript/lib",
   "i18n-ally.localesPaths": []
 }

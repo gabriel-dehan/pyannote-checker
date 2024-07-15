@@ -36,6 +36,7 @@ services:
       - .env
     environment:
       REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://myuser:mypassword@rest-api-postgres:5432/mydatabase?schema=myschema
     command: yarn workers
 
   postgres:

@@ -1,3 +1,4 @@
+import { VideoRepository } from 'config/repositories-config';
 import fs from 'fs/promises';
 import path from 'path';
 import {
@@ -11,12 +12,15 @@ import { VideoInput } from 'src/dtos/diarize/video';
 import { DiarizeService } from 'src/services/diarize.service';
 import { getS3KeyForUrl, getSignedAudioUrlFromS3 } from 'src/utils/s3';
 import { extractYoutubeId } from 'src/utils/youtube';
-import { Service } from 'typedi';
+import { Inject, Service } from 'typedi';
 
 @JsonController('/diarize')
 @Service()
 export class DiarizeController {
-  constructor(private diarizeService: DiarizeService) {}
+  constructor(
+    private diarizeService: DiarizeService,
+    @Inject('VideoRepository') private videoRepository: VideoRepository,
+  ) {}
 
   // Main page
   @Get('/video')
@@ -44,8 +48,17 @@ export class DiarizeController {
     console.log('[DiarizeController] Webhook:', JSON.stringify(body, null, 2));
 
     try {
-      // Extract the URL from the body (adjust this based on the actual structure of the webhook payload)
-      const url = body.url;
+      const video = await this.videoRepository.findOne({
+        where: {
+          lastDiarizationJobId: body.jobId,
+        },
+      });
+
+      if (!video) {
+        throw new Error('Video not found');
+      }
+
+      const url = video.url;
 
       if (!url) {
         throw new Error('URL not found in webhook payload');

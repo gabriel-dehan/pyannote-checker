@@ -69,7 +69,11 @@
     "pg": "^8.12.0",
     "reflect-metadata": "^0.2.2",
     "routing-controllers": "^0.10.4",
+    "ts-node": "^10.9.2",
     "typedi": "^0.10.0",
     "typeorm": "^0.3.20"
+  },
+  "resolutions": {
+    "string-width": "4.1.0"
   }
 }

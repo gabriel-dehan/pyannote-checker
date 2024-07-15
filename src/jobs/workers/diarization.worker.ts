@@ -1,8 +1,13 @@
 import Bull from 'bull';
 import https from 'https';
+import { Video } from 'src/entities/video.entity';
 import { getS3KeyForUrl, getSignedAudioUrlFromS3 } from 'src/utils/s3';
+import Container from 'typedi';
+import { Repository } from 'typeorm';
 
 export const diarizationWorker = async (job: Bull.Job<any>) => {
+  const videoRepository: Repository<Video> = Container.get('VideoRepository');
+
   const apiUrl = 'https://api.pyannote.ai/v1/diarize';
   const apiKey = process.env.PYANNOTE_API_KEY;
   const { url } = job.data;
@@ -29,11 +34,32 @@ export const diarizationWorker = async (job: Bull.Job<any>) => {
       };
 
       const req = https.request(apiUrl, options, (res) => {
-        res.on('end', (data: any) => {
-          console.log(
-            '[DiarizationWorker] Pyannote API Response:',
-            JSON.parse(data),
-          );
+        console.log(`[DiarizationWorker] Status Code: ${res.statusCode}`);
+        let responseData = '';
+
+        res.on('data', (chunk) => {
+          responseData += chunk;
+        });
+
+        res.on('end', async () => {
+          const data = JSON.parse(responseData);
+          console.log('[DiarizationWorker] Pyannote API Response:', data);
+
+          // Create or update video by url
+          const video = await videoRepository.findOne({ where: { url } });
+          if (video) {
+            video.lastDiarizationJobId = data.jobId;
+
+            await videoRepository.save(video);
+          } else {
+            const newVideo = new Video({
+              name: url, // temp do a ytdl get info
+              url,
+              lastDiarizationJobId: data.jobId,
+            });
+
+            await videoRepository.save(newVideo);
+          }
         });
         res.on('error', (error: any) => {
           console.error('[DiarizationWorker] Pyannote API Error:', error);

@@ -1,3 +1,4 @@
+import datasource from 'config/data-source';
 import { useRepositories } from 'config/repositories-config';
 import { useContainer } from 'routing-controllers';
 import { Container } from 'typedi';
@@ -8,11 +9,12 @@ import { captionsExtractionWorker } from './workers/captions-extraction.worker';
 import { diarizationWorker } from './workers/diarization.worker';
 import { videoDownloadWorker } from './workers/video-download.worker';
 
-// DI from typedi
-const containerWithRepositories = useRepositories();
-useContainer(containerWithRepositories);
-
 async function startWorker() {
+  await datasource.initialize();
+
+  // DI from typedi
+  const containerWithRepositories = useRepositories();
+  useContainer(containerWithRepositories);
   const jobQueue = Container.get(JobQueue);
 
   const workerOptions = {

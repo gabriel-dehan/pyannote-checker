@@ -5,6 +5,7 @@ import { Container } from 'typedi';
 import { JobQueue } from './job-queue';
 import { audioExtractionWorker } from './workers/audio-extraction.worker';
 import { captionsExtractionWorker } from './workers/captions-extraction.worker';
+import { diarizationWorker } from './workers/diarization.worker';
 import { videoDownloadWorker } from './workers/video-download.worker';
 
 // DI from typedi
@@ -24,6 +25,7 @@ async function startWorker() {
     workerOptions,
   );
   jobQueue.processAudioExtractionJobs(audioExtractionWorker, workerOptions);
+  jobQueue.processDiarizationJobs(diarizationWorker, workerOptions);
 }
 
 startWorker().catch(console.error);

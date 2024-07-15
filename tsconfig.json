@@ -46,5 +46,6 @@
   ],
   "ts-node": {
     "require": ["tsconfig-paths/register"]
-  }
+  },
+  "types": ["node", "@aws-sdk/client-s3"]
 }

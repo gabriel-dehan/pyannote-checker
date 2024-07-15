@@ -6,6 +6,7 @@ export class JobQueue {
   private videoDownloadQueue: Bull.Queue;
   private audioExtractionQueue: Bull.Queue;
   private captionsExtractionQueue: Bull.Queue;
+  private diarizationQueue: Bull.Queue;
 
   constructor() {
     const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
@@ -19,6 +20,9 @@ export class JobQueue {
     this.captionsExtractionQueue = new Bull('captions-extraction', {
       redis: redisUrl,
     });
+    this.diarizationQueue = new Bull('diarization', {
+      redis: redisUrl,
+    });
 
     this.setupErrorHandling();
   }
@@ -28,6 +32,7 @@ export class JobQueue {
       this.videoDownloadQueue,
       this.audioExtractionQueue,
       this.captionsExtractionQueue,
+      this.diarizationQueue,
     ].forEach((queue) => {
       queue.on('error', (error) => {
         console.error(`Bull queue error in ${queue.name}:`, error);
@@ -78,6 +83,22 @@ export class JobQueue {
     workerOptions: { concurrency?: number },
   ) {
     void this.audioExtractionQueue.process(
+      workerOptions?.concurrency || 1,
+      processor,
+    );
+  }
+
+  // Diarization Queue
+  async addDiarizationJob(data: { url: string }) {
+    const job = await this.diarizationQueue.add(data);
+    return job.id.toString();
+  }
+
+  processDiarizationJobs(
+    processor: (job: Bull.Job) => Promise<void>,
+    workerOptions: { concurrency?: number },
+  ) {
+    void this.diarizationQueue.process(
       workerOptions?.concurrency || 1,
       processor,
     );

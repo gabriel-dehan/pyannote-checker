@@ -7,6 +7,7 @@ import Container from 'typedi';
 
 import { JobQueue } from '../job-queue';
 
+// Should probably have called it ConversionPipelineWorker and have a small worker for the video download like the rest
 export const videoDownloadWorker = async (job: Bull.Job<any>) => {
   const jobQueue = Container.get(JobQueue);
   const { url } = job.data;
@@ -45,8 +46,8 @@ export const videoDownloadWorker = async (job: Bull.Job<any>) => {
     }
 
     await jobQueue.addCaptionsExtractionJob({ url });
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     await jobQueue.addAudioExtractionJob({ filePath });
+    await jobQueue.addDiarizationJob({ url });
   } catch (error) {
     console.error(
       `[VideoDownloadWorker] Error processing job ${job.id}:`,

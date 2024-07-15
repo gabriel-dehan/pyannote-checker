@@ -1,0 +1,33 @@
+version: '3.7'
+services:
+  api:
+    container_name: rest-api
+    build:
+      context: .
+      dockerfile: ./dockerfile.production
+    ports:
+      - 80:3000
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      PORT: 80
+      DATABASE_URL: postgresql://myuser:mypassword@rest-api-postgres:5432/mydatabase?schema=myschema
+      AUTH_SECRET:
+  postgres:
+    container_name: rest-api-postgres
+    image: postgres:13
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+
+volumes:
+  postgres:
+    name: database

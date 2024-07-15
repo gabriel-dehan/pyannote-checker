@@ -1,0 +1,21 @@
+FROM node:20.15.1 as build
+
+WORKDIR /usr/src/app
+
+COPY package.json yarn.lock ./
+
+RUN yarn install
+
+COPY . ./
+
+RUN yarn build
+
+ENV NODE_ENV production
+ENV PORT 3000
+
+COPY --from=build /usr/src/app/dist ./
+COPY --from=build /usr/src/app/node_modules ./node_modules
+
+EXPOSE 3000
+
+CMD ["yarn", "start"]

@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+  api:
+    container_name: rest-api
+    build:
+      context: .
+      dockerfile: ./dockerfile.dev
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3000:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://myuser:mypassword@rest-api-postgres:5432/mydatabase?schema=myschema
+      AUTH_SECRET: oIJ0JYc@8M8EYs#p
+  postgres:
+    container_name: rest-api-postgres
+    image: postgres:13
+    volumes:
+      - ./cli/scripts/postgres-initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    name: database

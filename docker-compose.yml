@@ -19,6 +19,24 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://myuser:mypassword@rest-api-postgres:5432/mydatabase?schema=myschema
       AUTH_SECRET: oIJ0JYc@8M8EYs#p
+
+  worker:
+    container_name: rest-api-worker
+    build:
+      context: .
+      dockerfile: ./dockerfile.dev
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - api
+      - redis
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379
+    command: yarn workers
+
   postgres:
     container_name: rest-api-postgres
     image: postgres:13
@@ -37,6 +55,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  redis:
+    container_name: rest-api-redis
+    image: redis:6
+    ports:
+      - 6379:6379
 
 volumes:
   postgres_data:

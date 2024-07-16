@@ -1,0 +1,44 @@
+<h1>Diarize Video</h1>
+
+<!-- YouTube video player -->
+<div id="player"></div>
+
+<!-- Current timestamp display -->
+<p>Current timestamp: <span id="timestamp">0:00</span></p>
+
+
+<% if (isProcessing) { %>
+    <p>Processing, please come back in a few minutes...</p>
+<% } %>
+<% if (data) { %>
+    <p>Video: <%= data.name %></p>
+    <p>Captions: <%= data.captions %></p>
+    <p>Diarization: <%= data.diarization %></p>
+<% } %>
+
+<script>
+  var player;
+  function onYouTubeIframeAPIReady() {
+    console.log('READY');
+      player = new YT.Player('player', {
+          height: '360',
+          width: '640',
+          videoId: '<%= data.videoId %>',
+          events: {
+              'onReady': onPlayerReady
+          }
+      });
+  }
+
+  function onPlayerReady(event) {
+      setInterval(updateTimestamp, 1000);
+  }
+
+  function updateTimestamp() {
+      var time = player.getCurrentTime();
+      var minutes = Math.floor(time / 60);
+      var seconds = Math.floor(time % 60);
+      document.getElementById('timestamp').textContent =
+          minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+  }
+</script>

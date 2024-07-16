@@ -1,20 +1,21 @@
 import { VideoRepository } from 'config/repositories-config';
 import fs from 'fs/promises';
+import { Context } from 'koa';
 import path from 'path';
 import {
   Body,
+  Controller,
+  Ctx,
   Get,
-  JsonController,
   Post,
   QueryParams,
 } from 'routing-controllers';
 import { VideoInput } from 'src/dtos/diarize/video';
 import { DiarizeService } from 'src/services/diarize.service';
-import { getS3KeyForUrl, getSignedAudioUrlFromS3 } from 'src/utils/s3';
 import { extractYoutubeId } from 'src/utils/youtube';
 import { Inject, Service } from 'typedi';
 
-@JsonController('/diarize')
+@Controller('/diarize')
 @Service()
 export class DiarizeController {
   constructor(
@@ -24,22 +25,40 @@ export class DiarizeController {
 
   // Main page
   @Get('/video')
-  async video(@QueryParams() input: VideoInput) {
+  async video(@QueryParams() input: VideoInput, @Ctx() ctx: Context) {
+    let isProcessing = false;
+    let data:
+      | {
+          name: string;
+          captions: string;
+          diarization: string;
+        }
+      | undefined;
+
+    // If the data doesn't exist, queue a job to download the video
     if (!(await this.diarizeService.dataExistsForUrl({ url: input.url }))) {
-      const key = getS3KeyForUrl(input.url);
-      const audioUrl = await getSignedAudioUrlFromS3(key);
-      console.log(audioUrl);
-      return { message: 'Data already exists' };
-    }
-    try {
-      const { jobId } = await this.diarizeService.downloadVideo({
+      try {
+        await this.diarizeService.downloadVideo({
+          url: input.url,
+        });
+
+        isProcessing = true;
+      } catch (error) {
+        console.error('Error queueing job:', error);
+        throw new Error('Failed to queue job');
+      }
+    } else {
+      data = await this.diarizeService.getDataForUrl({
         url: input.url,
       });
-      return { message: 'Video download queued', jobId };
-    } catch (error) {
-      console.error('Error queueing job:', error);
-      throw new Error('Failed to queue job');
     }
+
+    return await ctx.render('diarize/video', {
+      url: input.url,
+      isProcessing,
+      data,
+      layout: 'layout',
+    });
   }
 
   // Handle webhooks from Pyannote

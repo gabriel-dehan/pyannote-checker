@@ -21,5 +21,3 @@ newrelic_agent.log
 
 # cache directory for Jest
 .cache/jest
-
-tmp/*

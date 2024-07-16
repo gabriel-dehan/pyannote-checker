@@ -1,25 +1,33 @@
-<h1>Diarize Video</h1>
-
-<!-- YouTube video player -->
-<div id="player"></div>
-
-<!-- Current timestamp display -->
-<p>Current timestamp: <span id="timestamp">0:00</span></p>
-
+<h1>Diarize my video</h1>
 
 <% if (isProcessing) { %>
-    <p>Processing, please come back in a few minutes...</p>
-<% } %>
-<% if (data) { %>
-    <p>Video: <%= data.name %></p>
-    <p>Captions: <%= data.captions %></p>
-    <p>Diarization: <%= data.diarization %></p>
+    <p>Processing <%= data.url %>, please come back in a few minutes...</p>
+<% } else if (data) { %>
+    <h2><%= data.name %></h2>
+    <div id="player"></div>
+    <!-- <p>Current timestamp: <span id="timestamp">0:00</span></p> -->
+
+    <div class="subtitles-container">
+      <ul class="diarization-block">
+        <% data.diarization.diarization.forEach((segment, index) => { %>
+            <li data-segment-id="<%= index %>"><%= segment.start %> - <%= segment.end %>: <%= segment.speaker %></li>
+        <% }); %>
+      </ul>
+      <ul class="captions-block">
+        <% data.captions.forEach((segment, index) => { %>
+            <li data-segment-id="<%= index %>"><%= segment.start %> - <%= segment.end %>: <%= segment.text %></li>
+        <% }); %>
+      </ul>
+    </div>
 <% } %>
 
-<script>
-  var player;
-  function onYouTubeIframeAPIReady() {
-    console.log('READY');
+<% if (!isProcessing) { %>
+  <script>
+    var player;
+    var diarizationData = <%- JSON.stringify(data.diarization) %>;
+    var captionData = <%- JSON.stringify(data.captions) %>;
+
+    function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
           height: '360',
           width: '640',
@@ -28,17 +36,46 @@
               'onReady': onPlayerReady
           }
       });
-  }
+    }
 
-  function onPlayerReady(event) {
-      setInterval(updateTimestamp, 1000);
-  }
+    function onPlayerReady(event) {
+      setInterval(updateTimestamp, 500);
+    }
 
-  function updateTimestamp() {
+    function updateTimestamp() {
       var time = player.getCurrentTime();
       var minutes = Math.floor(time / 60);
       var seconds = Math.floor(time % 60);
       document.getElementById('timestamp').textContent =
           minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-  }
-</script>
+
+      // Handle diarization highlighting
+      var currentSegmentIndex = diarizationData.diarization.findIndex(segment => time >= segment.start && time <= segment.end);
+      if (currentSegmentIndex) {
+        // unhighlight all segments
+        document.querySelectorAll('.diarization-block li').forEach(segment => {
+          segment.style.backgroundColor = '';
+        });
+        // highlight diarization segment
+        var segment = document.querySelector(`.diarization-block li[data-segment-id="${currentSegmentIndex}"]`);
+        if (segment) {
+          segment.style.backgroundColor = 'yellow';
+        }
+      }
+
+      // Handle captions highlighting
+      var currentSegmentIndex = captionData.findIndex(segment => time >= segment.start && time <= segment.end);
+      if (currentSegmentIndex) {
+        // unhighlight all segments
+        document.querySelectorAll('.captions-block li').forEach(segment => {
+          segment.style.backgroundColor = '';
+        });
+        // highlight captions segment
+        var segment = document.querySelector(`.captions-block li[data-segment-id="${currentSegmentIndex}"]`);
+        if (segment) {
+          segment.style.backgroundColor = 'yellow';
+        }
+      }
+    }
+  </script>
+<% } %>

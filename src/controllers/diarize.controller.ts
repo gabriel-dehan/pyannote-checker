@@ -30,6 +30,8 @@ export class DiarizeController {
     let data:
       | {
           name: string;
+          url: string;
+          videoId: string | null;
           captions: string;
           diarization: string;
         }
@@ -43,6 +45,13 @@ export class DiarizeController {
         });
 
         isProcessing = true;
+        data = {
+          name: '',
+          url: input.url,
+          videoId: null,
+          captions: '',
+          diarization: '',
+        };
       } catch (error) {
         console.error('Error queueing job:', error);
         throw new Error('Failed to queue job');
@@ -53,12 +62,14 @@ export class DiarizeController {
       });
     }
 
-    return await ctx.render('diarize/video', {
+    await ctx.render('diarize/video', {
       url: input.url,
       isProcessing,
       data,
-      layout: 'layout',
+      title: `Diarize ${data?.name}`,
     });
+
+    return ctx.body;
   }
 
   // Handle webhooks from Pyannote

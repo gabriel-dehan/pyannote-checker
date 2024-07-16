@@ -6,7 +6,7 @@ import { routingConfigs } from 'config/routing-config';
 import { useMiddlewares } from 'config/server-middlewares';
 import * as dotenv from 'dotenv';
 import Koa from 'koa';
-import views from 'koa-views';
+import render from 'koa-ejs';
 import path from 'path';
 import { useContainer, useKoaServer } from 'routing-controllers';
 import { getConfig } from 'src/utils/config';
@@ -23,20 +23,6 @@ async function bootstrap() {
   const config = getConfig();
   const koa: Koa = new Koa();
 
-  // Setup views
-  koa.use(
-    views(path.join(__dirname, 'views'), {
-      extension: 'ejs',
-      options: {
-        layout: 'layout',
-        layoutPath: path.join(__dirname, 'views'),
-      },
-      map: {
-        html: 'ejs',
-      },
-    }),
-  );
-
   useMiddlewares(koa);
 
   // DI from typedi
@@ -44,6 +30,15 @@ async function bootstrap() {
   useContainer(containerWithRepositories);
 
   const app: Koa = useKoaServer<Koa>(koa, routingConfigs);
+
+  // Setup views
+  render(app, {
+    root: path.join(__dirname, 'views'),
+    layout: 'layout',
+    viewExt: 'ejs',
+    cache: false,
+    debug: false,
+  });
 
   // TODO: Register cron jobs
   // cron.start();

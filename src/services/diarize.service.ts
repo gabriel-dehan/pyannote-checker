@@ -35,7 +35,7 @@ export class DiarizeService {
 
     const fileBaseName = extractYoutubeId(input.url);
     const tmpDir = path.join(process.cwd(), 'tmp/');
-    const captionsPath = path.join(tmpDir, 'captions', `${fileBaseName}.ttml`);
+    const captionsPath = path.join(tmpDir, 'captions', `${fileBaseName}.json`);
     const diarizationPath = path.join(
       tmpDir,
       'diarizations',
@@ -46,12 +46,16 @@ export class DiarizeService {
       throw new Error(`Data not found for ${input.url}`);
     }
 
+    const captions = JSON.parse(fs.readFileSync(captionsPath, 'utf8'));
+    const diarization = JSON.parse(fs.readFileSync(diarizationPath, 'utf8'));
+
     // Yeah yeah the data should be stored in the DB and not read from the disk but I wanted to try a DB less approach at first, for fun, so most of the data is stored in the disk
     return {
       name: video.name,
+      url: input.url,
       videoId: extractYoutubeId(input.url),
-      captions: fs.readFileSync(captionsPath, 'utf8'),
-      diarization: fs.readFileSync(diarizationPath, 'utf8'),
+      captions,
+      diarization,
     };
   }
 

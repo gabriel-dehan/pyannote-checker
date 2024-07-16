@@ -1,6 +1,6 @@
-# Koa Boilerplate
+# Diarize
 
-- [Koa Boilerplate](#koa-boilerplate)
+- [Diarize](#diarize)
   - [Run](#run)
   - [Testing requests](#testing-requests)
   - [Setup](#setup)

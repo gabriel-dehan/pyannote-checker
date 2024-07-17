@@ -51,7 +51,14 @@ The front-end just reads the disk and the database to display an interface where
 $ yarn dev
 ```
 
-(Or just run the docker-compose like indicated in the setup below if you want to use docker)
+Or just run the docker-compose like indicated in the setup below if you want to use docker
+
+```
+$ docker-compose up
+```
+
+Note that this will run `yarn dev` but also run processes for the DB and background jobs.
+If you want to go barebone check [Barebone Setup](#barebone-setup)
 
 ## Testing requests
 

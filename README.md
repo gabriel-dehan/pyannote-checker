@@ -4,6 +4,8 @@ Made using [gabriel-dehan/ts-typeorm-koa-boilerplate](https://github.com/gabriel
 
 - [Diarize](#diarize)
   - [Demo](#demo)
+  - [How it works](#how-it-works)
+    - [Improvement avenues](#improvement-avenues)
   - [Run](#run)
   - [Testing requests](#testing-requests)
   - [Setup](#setup)
@@ -14,13 +16,34 @@ Made using [gabriel-dehan/ts-typeorm-koa-boilerplate](https://github.com/gabriel
       - [Create Database Schema](#create-database-schema)
     - [Init DB](#init-db)
     - [Migrations](#migrations)
-  - [Database schema](#database-schema)
-  - [TODO](#todo)
 
 ## Demo
 
 [Check the youtube video demo](https://www.youtube.com/watch?v=uTHZmDGUQ7c)
 
+## How it works
+
+- User enters a youtube URL in the form
+- In a background job Youtube video is downloaded using `ytdl-core` and written to the disk, see [video-download.worker.ts](https://github.com/gabriel-dehan/pyannote-checker/blob/main/src/jobs/workers/video-download.worker.ts)
+- A second job in  the pipeline takes the video and passes it through `ffmpeg` to extract a `.wav` sound track that is uploaded to S3, see [audio-extraction.worker.ts](https://github.com/gabriel-dehan/pyannote-checker/blob/main/src/jobs/workers/audio-extraction.worker.ts)
+- A third job calls the Youtube API to retrieve the caption in XML format and then normalises it to a segmented JSON file, see [captions-extraction.worker.ts](https://github.com/gabriel-dehan/pyannote-checker/blob/main/src/jobs/workers/captions-extraction.worker.ts)
+- A final job takes the S3 uploaded `.wav` file and sends it to the PyannoteAPI for processing, see [diarization.worker.ts](https://github.com/gabriel-dehan/pyannote-checker/blob/main/src/jobs/workers/diarization.worker.ts)
+- The PyannoteAPI calls the webhook defined in [diarize.controller.ts](https://github.com/gabriel-dehan/pyannote-checker/blob/main/src/controllers/diarize.controller.ts) and the resulting JSON file is written to disk.
+
+The front-end just reads the disk and the database to display an interface where you can watch the youtube video with the diarized captions.
+
+### Improvement avenues
+
+- For now everything uses the disk, I wanted to try a DB-less approach for the sake of simplicity. In the real world, I would probably use S3 and lambdas to handle most of the pipeline:
+  - A first lambda would download the youtube video by streaming it and piping the chunks directly into S3 to avoid writing on the lambda's ephemeral and limited file system
+  - Then the lambda would call the audio extraction lambda which would use ffmpeg the same way and store the data directly on S3
+  - The rest would probably be pretty much the same except uploaded to S3 instead of written to disk.
+
+- The diarization is fast so when you are on the loading page, it would be nice  to have a WS opened so when the webhook is called the page is reloaded directly for the client so they don't have to reload themselves.
+
+- Adding transcription through Whisper API to compare with the captions from Youtube.
+- Adding persistence for the diarized speaker aliases
+- Generate a final downloadable file with speaker + text embedded.
 
 ## Run
 
@@ -122,15 +145,3 @@ $ yarn typeorm migration:generate src/db/migrations/NameOfYourMig
 $ yarn typeorm migration:create src/db/migrations/NameOfYourMig
 $ yarn typeorm migration:revert
 ```
-
-## Database schema
-
-![Database schema](docs/schema.png)
-
-## TODO
-
-- Use DTO for service inputs and outputs
-  - Add validation on body params using those DTOs (see: https://github.com/typestack/routing-controllers#auto-validating-action-params)
-- Add a SessionController and allow the creation of jwt token using https://github.com/auth0/node-jsonwebtoken in exchange for a pwd
-- Add tests
-- Add a swagger for documentation

@@ -1,5 +1,3 @@
-<h1>Diarize</h1>
-
 <% if (isProcessing) { %>
   <div class="processing-container">
     <div class="loader"></div>
@@ -11,7 +9,7 @@
   <h2><%= data.name %></h2>
   <div id="player"></div>
   <div id="subtitles">
-    <strong id="speaker"></strong>
+    <strong id="speaker"></strong>&nbsp;
     <span id="text"></span>
   </div>
 
@@ -47,8 +45,8 @@
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
-          height: '360',
-          width: '640',
+          height: '540',
+          width: '960',
           videoId: '<%= data.videoId %>',
           events: {
               'onReady': onPlayerReady

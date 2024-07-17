@@ -25,6 +25,12 @@ async function bootstrap() {
 
   useMiddlewares(koa);
 
+  // Set path to locals for views
+  koa.use(async (ctx, next) => {
+    ctx.state.path = ctx.path;
+    await next();
+  });
+
   // DI from typedi
   const containerWithRepositories = useRepositories();
   useContainer(containerWithRepositories);

@@ -13,7 +13,15 @@
 
     <style>
       body {
+        max-width: initial;
+        margin: 0;
+        padding: 0;
+      }
+
+      main {
         max-width: 960px;
+        margin: 20px auto;
+        padding: 0 10px;
       }
 
       h1 {
@@ -30,6 +38,27 @@
         text-align: center;
       }
 
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #efefef;
+      }
+      .header h1 {
+        margin: 0 0 0 1em;
+        font-size: 1.8em;
+      }
+      .header-nav {
+        margin-right: 1.4em;
+      }
+      .header-nav li {
+        list-style: none;
+      }
+      .header-nav a {
+        text-decoration: none;
+        color: #343434;
+      }
+
       #player {
         text-align: center;
         margin: 0 auto;
@@ -40,26 +69,26 @@
         text-align: left;
         margin: 0 auto;
         display: flex;
-        gap: 10px;
         background: #343434;
         color: white;
-        padding: 1em;
-        width: 640px;
+        font-size: 1.2em;
+        padding: 1.2em 1em;
+        width: 100%;
         box-sizing: border-box;
-
-        #speaker {
-          color: white;
-        }
+      }
+      #speaker {
+        color: white;
       }
 
       .processing-container {
         display: flex;
         flex-direction: column;
         align-items: center;
+        margin-top: 3em;
       }
 
       .processing-container .loader {
-        margin-bottom: 3em;
+        margin-bottom: 2em;
       }
 
       .side-by-side-container {
@@ -119,12 +148,27 @@
           background-position: 0 50%,0 calc(0% - 2px),0 calc(100% + 2px),50% 50%,50% calc(0% - 2px),50% calc(100% + 2px),100% 50%,100% calc(0% - 2px),100% calc(100% + 2px);
       }
       }
+
+      footer {
+        border: none;
+      }
     </style>
 </head>
 <body>
-    <header>
-        <!-- Common header content -->
-    </header>
+    <% console.log(locals.path) %>
+    <% isHome = (locals.path || '/') === '/' %>
+    <% if (isHome) { %>
+      <header class="home-header">
+        <h1>Diarize</h1>
+      </header>
+    <% } else { %>
+      <header class="header">
+        <h1>Diarize</h1>
+        <ul class="header-nav">
+          <li><a href="/">Home</a></li>
+        </ul>
+      </header>
+    <% } %>
 
     <main>
         <%- body %>

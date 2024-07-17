@@ -19,7 +19,11 @@ export class DiarizeService {
     const videoFileName = `${extractYoutubeId(input.url)}.mp4`;
     const videoPath = path.join(tmpDir, videoFileName);
 
-    return fs.existsSync(videoPath);
+    const audioTmpDir = path.join(process.cwd(), 'tmp/audios');
+    const audioFileName = `${extractYoutubeId(input.url)}.wav`;
+    const audioPath = path.join(audioTmpDir, audioFileName);
+
+    return fs.existsSync(videoPath) && fs.existsSync(audioPath);
   }
 
   async getDataForUrl(input: VideoInput) {

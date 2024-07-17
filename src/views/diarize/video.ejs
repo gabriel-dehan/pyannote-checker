@@ -27,10 +27,21 @@
       <% }); %>
     </ul>
   </div>
+
+  <form id="speaker-alias-form">
+    <h3>Set speakers aliases</h3>
+    <div class="speaker-alias-form-container">
+      <div id="speaker-alias-inputs"></div>
+      <button type="submit">Set aliases</button>
+    </div>
+  </form>
+
 <% } %>
 
 <% if (!isProcessing) { %>
   <script>
+    // TODO: Move the JS elsewhere, it's a bit of a mess
+
     // Load YouTube IFrame API only when needed
     var tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
@@ -42,6 +53,7 @@
     var speaker;
     var diarizationData = <%- JSON.stringify(data.diarization) %>;
     var captionData = <%- JSON.stringify(data.captions) %>;
+    var speakerAliases = {};
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
@@ -54,7 +66,49 @@
       });
     }
 
+    function initializeSpeakerAliasForm() {
+      var speakers = [...new Set(diarizationData.diarization.map(segment => segment.speaker))];
+      var inputsContainer = document.getElementById('speaker-alias-inputs');
+
+      speakers.forEach(speaker => {
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.name = speaker;
+        input.placeholder = `Alias for ${speaker}`;
+        input.value = speakerAliases[speaker] || '';
+
+        var label = document.createElement('label');
+        label.textContent = `${speaker}: `;
+        label.appendChild(input);
+
+        inputsContainer.appendChild(label);
+      });
+
+      document.getElementById('speaker-alias-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        updateSpeakerAliases();
+      });
+    }
+
+    function updateSpeakerAliases() {
+      var inputs = document.getElementById('speaker-alias-inputs').getElementsByTagName('input');
+      for (var input of inputs) {
+        if (input.value) {
+          speakerAliases[input.name] = input.value;
+        } else {
+          delete speakerAliases[input.name];
+        }
+      }
+      renderSegments();
+      renderSubtitles();
+    }
+
+    function getDisplayName(speaker) {
+      return speakerAliases[speaker] || speaker;
+    }
+
     function onPlayerReady(event) {
+      initializeSpeakerAliasForm();
       setInterval(renderSegments, 500);
       setInterval(renderSubtitles, 500);
     }
@@ -74,6 +128,11 @@
         var segment = document.querySelector(`.diarization-block li[data-segment-id="${currentSegmentIndex}"]`);
         if (segment) {
           segment.style.backgroundColor = 'yellow';
+          var speakerElement = segment.querySelector('strong');
+        if (speakerElement) {
+          var originalSpeaker = diarizationData.diarization[currentSegmentIndex].speaker;
+            speakerElement.textContent = getDisplayName(originalSpeaker);
+          }
         }
       }
 
@@ -108,7 +167,7 @@
         }
 
         if (speaker) {
-          document.getElementById('speaker').textContent = `[${speaker}]`;
+          document.getElementById('speaker').textContent = `[${getDisplayName(speaker)}]`;
         }
         if (text) {
           document.getElementById('text').textContent = text;

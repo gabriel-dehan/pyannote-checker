@@ -9,7 +9,7 @@ export const routingConfigs: RoutingControllersOptions = {
   controllers: getEnumValues(controllers),
   middlewares: getEnumValues(middlewares),
   interceptors: [],
-  routePrefix: '/api',
+  routePrefix: '',
   validation: true,
   authorizationChecker: async (action: Action, roles: string[]) => {
     if (action.context.state?.user?.sub) {

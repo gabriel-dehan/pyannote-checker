@@ -26,7 +26,7 @@ export class DiarizeController {
   // Main page
   @Get('/video')
   async video(@QueryParams() input: VideoInput, @Ctx() ctx: Context) {
-    let isProcessing = false;
+    let isProcessing = true;
     let data:
       | {
           name: string;

@@ -1,31 +1,45 @@
 <h1>Diarize</h1>
 
 <% if (isProcessing) { %>
-    <p>Processing <%= data.url %>, please come back in a few minutes...</p>
+  <div class="processing-container">
+    <div class="loader"></div>
+    <p class="processing-message">Processing video at <strong><%= data.url %></strong>...<br><br>
+      Please come back in a few minutes 🕰️
+    </p>
+  </div>
 <% } else if (data) { %>
-    <h2><%= data.name %></h2>
-    <div id="player"></div>
-    <div id="subtitles">
-      <strong id="speaker"></strong>
-      <span id="text"></span>
-    </div>
+  <h2><%= data.name %></h2>
+  <div id="player"></div>
+  <div id="subtitles">
+    <strong id="speaker"></strong>
+    <span id="text"></span>
+  </div>
 
-    <div class="side-by-side-container">
-      <ul class="diarization-block">
-        <% data.diarization.diarization.forEach((segment, index) => { %>
-            <li data-segment-id="<%= index %>"><%= segment.start %> - <%= segment.end %>: <%= segment.speaker %></li>
-        <% }); %>
-      </ul>
-      <ul class="captions-block">
-        <% data.captions.forEach((segment, index) => { %>
-            <li data-segment-id="<%= index %>"><%= segment.start %> - <%= segment.end %>: <%= segment.text %></li>
-        <% }); %>
-      </ul>
-    </div>
+  <div class="side-by-side-container">
+    <ul class="diarization-block">
+      <li class="block-header">Diarization</li>
+      <% data.diarization.diarization.forEach((segment, index) => { %>
+          <li data-segment-id="<%= index %>"><strong><%= segment.start %> - <%= segment.end %></strong>: <%= segment.speaker %></li>
+      <% }); %>
+    </ul>
+    <ul class="captions-block">
+      <li class="block-header">Captions</li>
+      <% data.captions.forEach((segment, index) => { %>
+          <li data-segment-id="<%= index %>"><strong><%= segment.start %> - <%= segment.end %></strong>: <%= segment.text %></li>
+      <% }); %>
+    </ul>
+  </div>
 <% } %>
 
 <% if (!isProcessing) { %>
   <script>
+    // Load YouTube IFrame API only when needed
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var headScript = document.getElementsByTagName('head')[0];
+    headScript.appendChild(tag);
+
+    // Initialize
     var player;
     var speaker;
     var diarizationData = <%- JSON.stringify(data.diarization) %>;
@@ -47,7 +61,7 @@
       setInterval(renderSubtitles, 500);
     }
 
-    // Refactor
+    // TODO: Refactor
     function renderSegments() {
       var time = player.getCurrentTime();
 
@@ -86,14 +100,18 @@
       var currentCaptionSegmentIndex = captionData.findIndex(segment => time >= segment.start && time <= segment.end);
 
       if (currentDiarizationSegmentIndex || currentCaptionSegmentIndex) {
-        var text = captionData[currentCaptionSegmentIndex].text;
+        var text = captionData[currentCaptionSegmentIndex]?.text || null;
 
         if (currentDiarizationSegmentIndex) {
-          speaker = diarizationData.diarization[currentDiarizationSegmentIndex].speaker;
+          speaker = diarizationData.diarization[currentDiarizationSegmentIndex]?.speaker || null;
         }
 
-        document.getElementById('speaker').textContent = `[${speaker}]`;
-        document.getElementById('text').textContent = text;
+        if (speaker) {
+          document.getElementById('speaker').textContent = `[${speaker}]`;
+        }
+        if (text) {
+          document.getElementById('text').textContent = text;
+        }
       }
     }
   </script>

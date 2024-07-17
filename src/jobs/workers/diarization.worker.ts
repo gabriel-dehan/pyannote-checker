@@ -1,3 +1,4 @@
+import ytdl from '@distube/ytdl-core';
 import Bull from 'bull';
 import https from 'https';
 import { Video } from 'src/entities/video.entity';
@@ -20,7 +21,7 @@ export const diarizationWorker = async (job: Bull.Job<any>) => {
       const postData = JSON.stringify({
         url: audioUrl,
         webhook: process.env.WEBHOOK_BASE_URL
-          ? `${process.env.WEBHOOK_BASE_URL}/api/diarize/webhook`
+          ? `${process.env.WEBHOOK_BASE_URL}/diarize/webhook`
           : '',
       });
 
@@ -52,8 +53,10 @@ export const diarizationWorker = async (job: Bull.Job<any>) => {
 
             await videoRepository.save(video);
           } else {
+            const info = await ytdl.getBasicInfo(url);
+
             const newVideo = new Video({
-              name: url, // temp do a ytdl get info
+              name: info.videoDetails.title,
               url,
               lastDiarizationJobId: data.jobId,
             });

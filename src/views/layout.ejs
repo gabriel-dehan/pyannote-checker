@@ -5,16 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <!-- Add any common CSS or JS files here -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
 
     <style>
       body {
         max-width: 960px;
       }
 
-      h1, h2 {
+      h1 {
+        font-family: "Cabin Sketch", sans-serif;
+        font-weight: 700;
+        font-style: normal;
+        text-align: center;
+        font-size: 4.5em;
+        margin-top: 0.5em;
+        margin-bottom: 0.8em;
+      }
+
+      h2 {
         text-align: center;
       }
 
@@ -40,6 +52,16 @@
         }
       }
 
+      .processing-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .processing-container .loader {
+        margin-bottom: 3em;
+      }
+
       .side-by-side-container {
         display: flex;
         justify-content: space-around;
@@ -47,6 +69,55 @@
         background: #f1f1f1;
         padding: 1em;
         border-radius: 0.2em;
+      }
+      .side-by-side-container li {
+        list-style: none;
+      }
+      .side-by-side-container .block-header {
+        font-weight: bold;
+        margin-bottom: 0.5em;
+        font-size: 1.2em;
+      }
+
+      .video-form {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .video-form input[type="text"] {
+        width: 35%;
+      }
+
+      .loader {
+        width: 40px;
+        aspect-ratio: 1;
+        --c: linear-gradient(#000 0 0);
+        --r1: radial-gradient(farthest-side at bottom,#000 93%,#0000);
+        --r2: radial-gradient(farthest-side at top   ,#000 93%,#0000);
+        background:
+          var(--c) ,var(--r1),var(--r2),
+          var(--c) ,var(--r1),var(--r2),
+          var(--c) ,var(--r1),var(--r2);
+        background-repeat: no-repeat;
+        animation: l2 1s infinite alternate;
+      }
+      @keyframes l2 {
+        0%,25% {
+          background-size: 8px 0,8px 4px,8px 4px,8px 0,8px 4px,8px 4px,8px 0,8px 4px,8px 4px;
+          background-position: 0 50%,0 calc(50% - 2px),0 calc(50% + 2px),50% 50%,50% calc(50% - 2px),50% calc(50% + 2px),100% 50%,100% calc(50% - 2px),100% calc(50% + 2px);
+      }
+      50% {
+          background-size: 8px 100%,8px 4px,8px 4px,8px 0,8px 4px,8px 4px,8px 0,8px 4px,8px 4px;
+          background-position: 0 50%,0 calc(0% - 2px),0 calc(100% + 2px),50% 50%,50% calc(50% - 2px),50% calc(50% + 2px),100% 50%,100% calc(50% - 2px),100% calc(50% + 2px);
+      }
+      75% {
+          background-size: 8px 100%,8px 4px,8px 4px,8px 100%,8px 4px,8px 4px,8px 0,8px 4px,8px 4px;
+          background-position: 0 50%,0 calc(0% - 2px),0 calc(100% + 2px),50% 50%,50% calc(0% - 2px),50% calc(100% + 2px),100% 50%,100% calc(50% - 2px),100% calc(50% + 2px);
+      }
+      95%,100% {
+          background-size: 8px 100%,8px 4px, 8px 4px,8px 100%,8px 4px,8px 4px,8px 100%,8px 4px,8px 4px;
+          background-position: 0 50%,0 calc(0% - 2px),0 calc(100% + 2px),50% 50%,50% calc(0% - 2px),50% calc(100% + 2px),100% 50%,100% calc(0% - 2px),100% calc(100% + 2px);
+      }
       }
     </style>
 </head>

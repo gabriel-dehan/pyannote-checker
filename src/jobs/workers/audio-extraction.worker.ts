@@ -2,9 +2,14 @@ import Bull from 'bull';
 import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs';
 import { uploadToS3 } from 'src/utils/s3';
+import Container from 'typedi';
+
+import { JobQueue } from '../job-queue';
 
 export const audioExtractionWorker = async (job: Bull.Job<any>) => {
-  const { filePath } = job.data;
+  const jobQueue = Container.get(JobQueue);
+  const { filePath, url } = job.data;
+
   try {
     const audioPath = filePath
       .replace('.mp4', '.wav')
@@ -24,6 +29,9 @@ export const audioExtractionWorker = async (job: Bull.Job<any>) => {
     await extractAudio(filePath, audioPath);
     await uploadToS3(audioPath);
     console.log(`[AudioExtractionWorker] Audio uploaded to S3: ${audioPath}`);
+
+    await jobQueue.addDiarizationJob({ url });
+
     return audioPath;
   } catch (error) {
     console.error(

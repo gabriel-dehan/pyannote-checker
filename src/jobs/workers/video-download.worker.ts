@@ -46,8 +46,7 @@ export const videoDownloadWorker = async (job: Bull.Job<any>) => {
     }
 
     await jobQueue.addCaptionsExtractionJob({ url });
-    await jobQueue.addAudioExtractionJob({ filePath });
-    await jobQueue.addDiarizationJob({ url });
+    await jobQueue.addAudioExtractionJob({ filePath, url });
   } catch (error) {
     console.error(
       `[VideoDownloadWorker] Error processing job ${job.id}:`,

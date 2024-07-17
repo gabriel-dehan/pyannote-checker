@@ -73,7 +73,7 @@ export class JobQueue {
   }
 
   // Audio Extraction Queue
-  async addAudioExtractionJob(data: { filePath: string }) {
+  async addAudioExtractionJob(data: { filePath: string; url: string }) {
     const job = await this.audioExtractionQueue.add(data);
     return job.id.toString();
   }

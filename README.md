@@ -1,6 +1,9 @@
 # Diarize
 
+Made using [gabriel-dehan/ts-typeorm-koa-boilerplate](https://github.com/gabriel-dehan/ts-typeorm-koa-boilerplate)
+
 - [Diarize](#diarize)
+  - [Demo](#demo)
   - [Run](#run)
   - [Testing requests](#testing-requests)
   - [Setup](#setup)
@@ -13,6 +16,11 @@
     - [Migrations](#migrations)
   - [Database schema](#database-schema)
   - [TODO](#todo)
+
+## Demo
+
+[Check the youtube video demo](https://www.youtube.com/watch?v=uTHZmDGUQ7c)
+
 
 ## Run
 

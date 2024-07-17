@@ -97,7 +97,10 @@
       var currentDiarizationSegmentIndex = diarizationData.diarization.findIndex(segment => time >= segment.start && time <= segment.end);
       var currentCaptionSegmentIndex = captionData.findIndex(segment => time >= segment.start && time <= segment.end);
 
-      if (currentDiarizationSegmentIndex || currentCaptionSegmentIndex) {
+      if (currentDiarizationSegmentIndex === -1 && currentCaptionSegmentIndex === -1) {
+        document.getElementById('speaker').textContent = '';
+        document.getElementById('text').textContent = '';
+      } else if (currentDiarizationSegmentIndex || currentCaptionSegmentIndex) {
         var text = captionData[currentCaptionSegmentIndex]?.text || null;
 
         if (currentDiarizationSegmentIndex) {
